@@ -12,7 +12,7 @@ mod tests {
     use crate::Solution;
 
     #[test]
-    fn test_add() {
+    fn test1() {
         let res = Solution::temp();
         assert_eq!(res, 1);
     }
