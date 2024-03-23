@@ -1,10 +1,18 @@
 #![allow(dead_code)]
+
+use std::fmt::Debug;
 #[derive(PartialEq, Eq, Clone, Debug)]
-pub struct ListNode<T: Copy> {
+pub struct ListNode<T>
+where
+    T: Copy + Debug,
+{
     pub val: T,
     pub next: Option<Box<ListNode<T>>>,
 }
-impl<T: Copy> ListNode<T> {
+impl<T> ListNode<T>
+where
+    T: Copy + Debug,
+{
     #[inline]
     pub fn new(val: T) -> Self {
         ListNode { next: None, val }
@@ -24,13 +32,23 @@ impl<T: Copy> ListNode<T> {
     }
 }
 
+// impl<T> fmt::Display for ListNode<T>
+// where
+//     T: Copy + Debug,
+// {
+//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+//         write!(f, "{:?}", self.val)
+//     }
+// }
+
 #[cfg(test)]
 mod tests {
     use super::ListNode;
 
     #[test]
     fn from_vec() {
-        let head = ListNode::from_vec(vec![1, 2, 3, 4]);
-        println!("{head:?}")
+        let node1 = ListNode::from_vec(vec![1, 2, 3, 4]);
+        let node2 = ListNode::from_vec(vec![1, 2, 3, 4]);
+        assert_eq!(node1, node2)
     }
 }

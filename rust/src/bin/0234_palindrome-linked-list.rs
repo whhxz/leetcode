@@ -1,6 +1,4 @@
 #![allow(dead_code)]
-// Definition for singly-linked list.
-
 type ListNode = rust::util::linked::ListNode<i32>;
 struct Solution {}
 impl Solution {
@@ -28,12 +26,18 @@ impl Solution {
 }
 #[cfg(test)]
 mod tests {
+    use rust::util::linked::ListNode;
+
     use crate::Solution;
 
     #[test]
     fn test1() {
-        let res = Solution::is_palindrome(None);
-        assert_eq!(res, true);
+        let node = ListNode::from_vec(vec![1, 2, 2, 1]);
+        let res = Solution::is_palindrome(node);
+        assert!(res);
+        let node = ListNode::from_vec(vec![1, 2]);
+        let res = Solution::is_palindrome(node);
+        assert!(!res);
     }
 }
 fn main() {}
