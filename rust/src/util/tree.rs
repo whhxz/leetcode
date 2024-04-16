@@ -23,40 +23,79 @@ where
             right: None,
         }
     }
+    pub fn from_vec2(data: Vec<i32>) -> Option<Rc<RefCell<TreeNode<i32>>>> {
+        let len = data.len();
+        if len == 0 {
+            return None;
+        }
+        let root = Rc::new(RefCell::new(TreeNode::new(data[0])));
+        let mut depth_nodes = vec![Some(root.clone())];
+        let mut i = 1;
+        while depth_nodes.len() > 0 && i < len {
+            let mut ts = vec![];
+            for node in &depth_nodes {
+                if i >= len {
+                    break;
+                }
+                let left = data
+                    .get(i)
+                    .filter(|x| **x != i32::MIN)
+                    .map(|x| Rc::new(RefCell::new(TreeNode::new(*x))));
+                let right = data
+                    .get(i + 1)
+                    .filter(|x| **x != i32::MIN)
+                    .map(|x| Rc::new(RefCell::new(TreeNode::new(*x))));
+                if let Some(node) = node {
+                    let mut node = node.borrow_mut();
+                    node.left = left.clone();
+                    node.right = right.clone();
+                }
+                ts.push(left.clone());
+                ts.push(right.clone());
+                i += 2;
+            }
+            depth_nodes = ts;
+        }
+        Some(root)
+    }
+
     pub fn from_vec(data: Vec<i32>) -> Option<Rc<RefCell<TreeNode<i32>>>> {
         let len = data.len();
         if len == 0 {
             return None;
         }
         let root = Rc::new(RefCell::new(TreeNode::new(data[0])));
-        let mut nodes = vec![Rc::clone(&root)];
-        let mut i = 0;
-        while nodes.len() > 0 && i < len {
+        let mut depth_nodes = vec![root.clone()];
+        let mut i = 1;
+        while depth_nodes.len() > 0 && i < len {
             let mut ts = vec![];
-            for node in &nodes {
+            for node in &depth_nodes {
+                if i >= len {
+                    break;
+                }
+                let left = data
+                    .get(i)
+                    .filter(|x| **x != i32::MIN)
+                    .map(|x| Rc::new(RefCell::new(TreeNode::new(*x))));
+                let right = data
+                    .get(i + 1)
+                    .filter(|x| **x != i32::MIN)
+                    .map(|x| Rc::new(RefCell::new(TreeNode::new(*x))));
                 let mut node = node.borrow_mut();
-                i += 1;
-                if i == len {
-                    break;
+                node.left = left.clone();
+                node.right = right.clone();
+
+                if let Some(node) = left {
+                    ts.push(node);
                 }
-                if data[i] != i32::MIN {
-                    let left = Rc::new(RefCell::new(TreeNode::new(data[i])));
-                    node.left = Some(Rc::clone(&left));
-                    ts.push(left);
+                if let Some(node) = right {
+                    ts.push(node);
                 }
-                i += 1;
-                if i == len {
-                    break;
-                }
-                if data[i] != i32::MIN {
-                    let right = Rc::new(RefCell::new(TreeNode::new(data[i])));
-                    node.right = Some(Rc::clone(&right));
-                    ts.push(right);
-                }
+                i += 2;
             }
-            nodes = ts;
+            depth_nodes = ts;
         }
-        return Some(root);
+        Some(root)
     }
 }
 
@@ -66,13 +105,38 @@ mod tests {
 
     use super::TreeNode;
 
+    // #[test]
+    // fn from_vec() {
+    //     let root: Option<Rc<RefCell<TreeNode<i32>>>> =
+    //         TreeNode::<i32>::from_vec(vec![1, i32::MIN, 2, 3]);
+    //     dbg!(&root);
+    //     let root2: Option<Rc<RefCell<TreeNode<i32>>>> =
+    //         TreeNode::<i32>::from_vec(vec![1, i32::MIN, 2, 3]);
+    //     assert_eq!(root, root2);
+    // }
     #[test]
-    fn from_vec() {
+    fn from_vec2() {
         let root: Option<Rc<RefCell<TreeNode<i32>>>> =
-            TreeNode::<i32>::from_vec(vec![1, i32::MIN, 2, 3]);
-        dbg!(&root);
+            TreeNode::<i32>::from_vec2(vec![1, i32::MIN, 2, 3]);
         let root2: Option<Rc<RefCell<TreeNode<i32>>>> =
-            TreeNode::<i32>::from_vec(vec![1, i32::MIN, 2, 3]);
+            TreeNode::<i32>::from_vec2(vec![1, i32::MIN, 2, 3]);
         assert_eq!(root, root2);
+    }
+
+    #[test]
+    fn from_vec3() {
+        let null = i32::MIN;
+
+        let t1 = TreeNode::<i32>::from_vec(vec![1, 4, null, 2, null, 3, 1]);
+        let t2 = TreeNode::<i32>::from_vec2(vec![1, 4, null, 2, null, null, null, 3, 1]);
+        assert_eq!(t1, t2);
+
+        let t1 = TreeNode::<i32>::from_vec2(vec![4, 2, null, 3, 1]);
+        let t2 = TreeNode::<i32>::from_vec(vec![4, 2, null, 3, 1]);
+        assert_eq!(t1, t2);
+
+        let t1 = TreeNode::<i32>::from_vec2(vec![4, 2, null, 1, 1, null, null, 3, null, null, 1]);
+        let t2 = TreeNode::<i32>::from_vec(vec![4, 2, null, 1, 1, 3, null, null, 1]);
+        assert_eq!(t1, t2);
     }
 }
